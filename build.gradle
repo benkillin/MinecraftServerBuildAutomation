@@ -82,6 +82,9 @@ task copyFactionsPlugins(type: Copy, dependsOn: copyServerFilestructure) {
     }
 }
 
+// TODO: figure out how to generate the config files to work with for the servers and plugins
+// TODO: figure out how to apply only the required changes to config files we need
+
 zip.dependsOn copyServerJars
 zip.dependsOn copyBungeecordJars
 zip.dependsOn copyCommonPlugins
