@@ -1,0 +1,30 @@
+# eclipse
+bin
+*.launch
+.settings
+.metadata
+.classpath
+.project
+
+# idea
+out
+*.ipr
+*.iws
+*.iml
+.idea
+
+# gradle
+build
+.gradle
+
+# other
+eclipse
+run
+
+#vscode
+.vscode
+
+# don't include any jars because some are not allowed to be re-distributed.
+*.jar
+*.zip
+QUESTIONABLE_NOT_NEEDED_PLUGINS
