@@ -18,13 +18,14 @@ dependencies {}
 
 repositories {}
 
-import org.paleozogt.gradle.zip.SymZip;
+import org.paleozogt.gradle.zip.*;
 
 description = "Build script to create factions and cannon testing minecraft server."
-version = "0.1.0"
+version = "0.2.0"
 
 task zip(type: SymZip) {
     from "${buildDir}/serverBuild"
+    archiveName "${rootProject.name}.${version}.zip"
 }
 
 task copyServerFilestructure(type: Copy) {
@@ -47,14 +48,43 @@ task copyServerJars(type: Copy, dependsOn: copyServerFilestructure) {
 task copyCommonPlugins(type: Copy, dependsOn: copyServerFilestructure) {
     from "sourceJars/PLUGINS"
     into "${buildDir}/serverBuild/common/plugins"
-    include "*.jar"
+    include "**/*.jar" // not sure if we want to exclude things like the readme or not...
     eachFile {
         path = name
     }
     includeEmptyDirs = false
 }
 
+task copyCannonPlugins(type: Copy, dependsOn: copyServerFilestructure) {
+    from "sourceJars/CANNON_PLUGINS"
+    into "${buildDir}/serverBuild/cannon/plugins"
+    include "**/*.jar" // not sure if we want to exclude things like the readme or not...
+    eachFile {
+        path = name
+    }
+    includeEmptyDirs = false
+}
+
+task copyFactionsPlugins(type: Copy, dependsOn: copyServerFilestructure) {
+    from "sourceJars/FACTIONS_PLUGINS"
+    into "${buildDir}/serverBuild/factions/plugins"
+    include "**/*.jar" // not sure if we want to exclude things like the readme or not...
+    eachFile {
+        path = name
+    }
+    includeEmptyDirs = false
+    
+    doLast {
+        copy {
+            from zipTree(file("sourceJars/FACTIONS_PLUGINS/ItemDrop.zip"))
+            into "${buildDir}/serverBuild/factions/plugins"
+        }
+    }
+}
+
 zip.dependsOn copyServerJars
 zip.dependsOn copyBungeecordJars
 zip.dependsOn copyCommonPlugins
+zip.dependsOn copyCannonPlugins
+zip.dependsOn copyFactionsPlugins
 assemble.dependsOn zip
