@@ -1,17 +1,29 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'org.paleozogt:symzip-plugin:0.9.4'
+    }
+}
+
 plugins {
     id 'base'
 }
 
 apply plugin: 'base'
+apply plugin: "org.paleozogt.symzip"
 
 dependencies {}
 
 repositories {}
 
+import org.paleozogt.gradle.zip.SymZip;
+
 description = "Build script to create factions and cannon testing minecraft server."
 version = "0.1.0"
 
-task zip(type: Zip, group: "Archive", description: "Archives sources in a zip file") {
+task zip(type: SymZip) {
     from "${buildDir}/serverBuild"
 }
 
@@ -20,23 +32,29 @@ task copyServerFilestructure(type: Copy) {
     into "${buildDir}/serverBuild"
 }
 
-task copyBungeecordJars(type: Copy) {
+task copyBungeecordJars(type: Copy, dependsOn: copyServerFilestructure) {
     from "sourceJars/SERVER_JARS/bungee"
     into "${buildDir}/serverBuild/bungeecord"
     include "BungeeCord.jar"
 }
 
-task copyServerJars << {
-    ["${buildDir}/serverBuild/hub", "${buildDir}/serverBuild/cannon", "${buildDir}/serverBuild/factions"].each { dest -> 
-        copy {
-            from "sourceJars/SERVER_JARS/TacoSpigot/TacoSpigot-illegal.jar"
-            into dest
-        }
-    }
+task copyServerJars(type: Copy, dependsOn: copyServerFilestructure) {
+    from "sourceJars/SERVER_JARS/TacoSpigot"
+    into "${buildDir}/serverBuild/common"
+    include "TacoSpigot-illegal.jar"
 }
 
-copyBungeecordJars.dependsOn copyServerFilestructure
-copyServerJars.dependsOn copyServerFilestructure
+task copyCommonPlugins(type: Copy, dependsOn: copyServerFilestructure) {
+    from "sourceJars/PLUGINS"
+    into "${buildDir}/serverBuild/common/plugins"
+    include "*.jar"
+    eachFile {
+        path = name
+    }
+    includeEmptyDirs = false
+}
+
 zip.dependsOn copyServerJars
 zip.dependsOn copyBungeecordJars
+zip.dependsOn copyCommonPlugins
 assemble.dependsOn zip
